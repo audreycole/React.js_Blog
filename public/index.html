@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>React Tutorial</title>
+    <!-- Not present in the tutorial. Just for basic styling. -->
+    <link rel="stylesheet" href="css/base.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+  </head>
+  <body>
+    <div id="content"></div>
+    <script type="text/babel">
+
+      /* 
+      The structure of our home page in React is such:
+      - Welcome 
+        - Sign In
+        - Sign Up
+      */
+
+      // Welcome root component
+      var WelcomeBox = React.createClass({
+        handleSignInSubmit: function(comment) {
+          // Submit to the server and take you to home page
+          $.ajax({
+            url: this.state.url,
+            dataType: 'json',
+            type: 'POST',
+            data: login,
+            success: function(data) {
+              //this.setState({data: data}); <--- fix this
+            }.bind(this),
+            error: function(xhr, status, err) {
+              console.error(this.props.url, status, err.toString());
+            }.bind(this)
+          });
+        },
+        handleSignUpSubmit: function(comment) {
+          // Submit to the server and take you to home page
+          $.ajax({
+            url: this.state.url,
+            dataType: 'json',
+            type: 'POST',
+            data: login,
+            success: function(data) {
+              //this.setState({data: data}); <--- fix this
+            }.bind(this),
+            error: function(xhr, status, err) {
+              console.error(this.props.url, status, err.toString());
+            }.bind(this)
+          });
+        },
+        render: function() {
+          return (
+            <div className="welcomeBox">
+              <h1> Welcome to the Blog </h1>
+              < SignIn onSignInSubmit={this.handleSignInSubmit} />
+              < SignUp onSignUpSubmit={this.handleSignUpSubmit} />
+            </div>
+          );
+        }
+      }); 
+
+      // signIn component
+      var SignIn = React.createClass({
+        getInitialState: function() {
+          return {username: '', password: ''};
+        },
+        handleUsernameChange: function(e) {
+          this.setState({username: e.target.value});
+        },
+        handlePasswordChange: function(e) {
+          this.setState({password: e.target.value});
+        },
+        handleSubmit: function(e) {
+          // Call preventDefault() on the event to prevent the browser's default action of submitting the form.
+          e.preventDefault();
+          var username = this.state.username.trim();
+          var password = this.state.password.trim();
+          if (!username || !password) {
+            return;
+          }
+          // TODO: send request to the server
+          this.setState({url: 'api/signin'});
+          this.props.onSignInSubmit({username: username, password: password});
+          this.setState({username: '', password: ''});
+        },
+        render: function() {
+          return (
+            <form className="commentForm" onSubmit={this.handleSubmit}>
+              <p> <u>Sign In:</u> </p>
+              <input type="text" placeholder="Username" value={this.state.author} onChange={this.handleUsernameChange} />
+              <input type="text" placeholder="Password" value={this.state.text} onChange={this.handlePasswordChange} />
+              <input type="submit" value="Post" />
+            </form>
+          );
+        }
+      });
+
+      // signUp component
+      var SignUp = React.createClass({
+        getInitialState: function() {
+          return {username: '', password: ''};
+        },
+        handleUsernameChange: function(e) {
+          this.setState({username: e.target.value});
+        },
+        handlePasswordChange: function(e) {
+          this.setState({password: e.target.value});
+        },
+        handleSubmit: function(e) {
+          // Call preventDefault() on the event to prevent the browser's default action of submitting the form.
+          e.preventDefault();
+          var username = this.state.username.trim();
+          var password = this.state.password.trim();
+          if (!username || !password) {
+            return;
+          }
+          // TODO: send request to the server
+          this.setState({url: 'api/signup'});
+          this.props.onSignUpSubmit({username: username, password: password});
+          this.setState({username: '', password: ''});
+        },
+        render: function() {
+          return (
+            <form className="commentForm" onSubmit={this.handleSubmit}>
+              <p> <u>Sign Up:</u> </p>  
+              <input type="text" placeholder="Username" value={this.state.author} onChange={this.handleUsernameChange} />
+              <input type="text" placeholder="Password" value={this.state.text} onChange={this.handlePasswordChange} />
+              <input type="submit" value="Post" />
+            </form>
+          );
+        }
+      }); 
+
+      ReactDOM.render(
+        <WelcomeBox />,
+        document.getElementById('content')
+      );
+
+    </script>
+  </body>
+</html>

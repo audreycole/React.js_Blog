@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>React Tutorial</title>
+    <!-- Not present in the tutorial. Just for basic styling. -->
+    <link rel="stylesheet" href="css/base.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+  </head>
+  <body>
+    <div id="content"></div>
+    <script type="text/babel">
+
+      /* 
+      The structure of our home page in React is such:
+      - BlogEntryBox
+        - EntryList
+          - Entry
+        - EntryForm
+        - Sign Out
+      */
+
+      // BlogEntryBox root component
+      var BlogEntryBox = React.createClass({
+        render: function() {
+          return (
+            <div className="blogEntryBox">
+              <h1>Welcome to the Blog</h1>
+              <EntryList />
+              <SignOut />
+            </div>
+          );
+        }
+      });  
+
+      // EntryList component
+      var EntryList = React.createClass({
+        render: function() {
+          return (
+            <div className="entryList">
+              <Entry title="My Day">My day sucked.</Entry>
+              <Entry title="Gaby"> Is a <em>great</em> friend. </Entry>
+            </div>
+          );
+        }
+      });
+
+      // Entry component
+      var Entry = React.createClass({
+        render: function() {
+          return (
+            <div className="entry">
+              <h2 className="entryTitle">
+                {this.props.title}
+              </h2>
+              {this.props.children}
+            </div>
+          );
+        }
+      });
+
+      // SignOut component
+      var SignOut = React.createClass({
+        render: function() {
+          return (
+            <form className="signOutForm" onSubmit={this.handleSubmit}>
+              <p> <u>Sign Out:</u> </p>  
+              <input type="submit" value="Submit" />
+            </form>
+          );
+        }
+      });
+
+      ReactDOM.render(
+        <BlogEntryBox/>,
+        document.getElementById('content')
+      );
+
+    </script>
+  </body>
+</html>
