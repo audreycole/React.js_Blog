@@ -4,7 +4,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 
-var COMMENTS_FILE = path.join(__dirname, 'comments.json');
+var ENTRIES_FILE = path.join(__dirname, 'entries.json');
+var USERS_FILE = path.join(__dirname, 'users.json');
 
 app.set('port', (process.env.PORT || 3000));
 
@@ -35,7 +36,26 @@ app.use(function(request, response, next) {
   }
 });
 
+app.post('/api/signin', function(request, response) {
+  // Get the username and password passed as input
+  var username = request.param('login').username;
+  var password = request.param('login').password;
+  console.log("getRequest for login");
+  fs.readFile(ENTRIES_FILE, function(err, data) {
+    if(err) {
+      console.error(err);
+      process.exit(1);
+    }
 
+    var json = JSON.parse(data);
+    for(var obj in json) {
+      console.log("username:"+json[obj][username]+", password:"+json[obj][password]);
+    }
+
+    res.json(json);
+
+  });
+}); 
 
 /*app.get('/api/comments', function(req, res) {
   fs.readFile(COMMENTS_FILE, function(err, data) {

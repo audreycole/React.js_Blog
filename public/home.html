@@ -26,11 +26,14 @@
 
       // BlogEntryBox root component
       var BlogEntryBox = React.createClass({
+        getInitialState: function() {
+          return {data: []};
+        },
         render: function() {
           return (
             <div className="blogEntryBox">
               <h1>Welcome to the Blog</h1>
-              <EntryList />
+              <EntryList data={this.state.data}/>
               <SignOut />
             </div>
           );

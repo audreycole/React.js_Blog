@@ -24,13 +24,16 @@
 
       // Welcome root component
       var WelcomeBox = React.createClass({
-        handleSignInSubmit: function(comment) {
+        getInitialState: function() {
+          return {data: []};
+        },
+        handleSignInSubmit: function(username, password, url) {
           // Submit to the server and take you to home page
           $.ajax({
-            url: this.state.url,
+            url: url,
             dataType: 'json',
             type: 'POST',
-            data: login,
+            data: {username: username, password: password},
             success: function(data) {
               //this.setState({data: data}); <--- fix this
             }.bind(this),
@@ -39,13 +42,13 @@
             }.bind(this)
           });
         },
-        handleSignUpSubmit: function(comment) {
+        handleSignUpSubmit: function(username, password) {
           // Submit to the server and take you to home page
           $.ajax({
             url: this.state.url,
             dataType: 'json',
             type: 'POST',
-            data: login,
+            data: username, password,
             success: function(data) {
               //this.setState({data: data}); <--- fix this
             }.bind(this),
@@ -86,7 +89,7 @@
           }
           // TODO: send request to the server
           this.setState({url: 'api/signin'});
-          this.props.onSignInSubmit({username: username, password: password});
+          this.props.onSignInSubmit(username, password, '/api/signin');
           this.setState({username: '', password: ''});
         },
         render: function() {
@@ -122,7 +125,8 @@
           }
           // TODO: send request to the server
           this.setState({url: 'api/signup'});
-          this.props.onSignUpSubmit({username: username, password: password});
+          // Editing this
+          this.props.onSignUpSubmit(username, password);
           this.setState({username: '', password: ''});
         },
         render: function() {
