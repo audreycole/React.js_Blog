@@ -36,23 +36,44 @@ app.use(function(request, response, next) {
   }
 });
 
+app.get('/home', function(request, response) {
+  data = fs.readFile('/home.html',   function (err, data) {
+    res.setHeader('Content-Type', 'text/html');
+    res.send(data);
+  });
+});
+
 app.post('/api/signin', function(request, response) {
   // Get the username and password passed as input
-  var username = request.param('login').username;
-  var password = request.param('login').password;
-  console.log("getRequest for login");
-  fs.readFile(ENTRIES_FILE, function(err, data) {
+  var username = request.body.username;
+  var password = request.body.password;
+
+  var isLoggedIn = false;
+  
+  fs.readFile(USERS_FILE, function(err, data) {
     if(err) {
       console.error(err);
       process.exit(1);
     }
 
+    // Parse the JSON file into a variable
     var json = JSON.parse(data);
-    for(var obj in json) {
-      console.log("username:"+json[obj][username]+", password:"+json[obj][password]);
+    // Loop through all the keys in the file
+    for(var i = 0; i < json.length; i++) {
+      var obj = json[i];
+
+      if(obj.username == username && obj.password == password) {
+        isLoggedIn = true;
+      }
+
     }
 
-    res.json(json);
+    if(isLoggedIn) {
+      res.json({'msg':'redirect','location':'/home'});
+    }
+    else {
+      response.json({'msg':'notLoggedIn','location':''});
+    }
 
   });
 }); 
