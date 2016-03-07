@@ -140,6 +140,8 @@ app.post('/api/signup', function(request, response) {
     }
 
   });
+
+
 }); 
 
 
@@ -182,7 +184,11 @@ app.get('/api/entries', function(request, response) {
 app.post('/api/entries', function(request, response) {
   // Get the username passed as input
   var username = request.body.username;
+  var title = request.body.title;
+  var text = request.body.text;
   
+  var entries = [];
+
   fs.readFile(ENTRIES_FILE, function(err, data) {
     if(err) {
       console.error(err);
@@ -191,51 +197,66 @@ app.post('/api/entries', function(request, response) {
 
     // Parse the JSON file into a variable
     var json = JSON.parse(data);
-    // Loop through all the keys in the file
-    for(var i = 0; i < json.length; i++) {
-      var obj = json[i];
 
-      if(obj.username == username) {
+    var newEntry = {
+      'id': Date.now(),
+      'title': title,
+      'text': text
+    };
+
+    var foundUser = false;
+
+    // Loop through all the objects in the file
+    for (var i = 0; i < json.length; i++) {
+      console.log(json[i]);
+      
+      // get the key of the object (username)
+      for(var entry_user in json[i]) {
         
+        if(entry_user == username) {
+
+          foundUser = true;
+
+          // Add in the new Entry for that user
+          json[i][entry_user].push(newEntry);
+          entries = json[i][entry_user];
+
+          fs.writeFile(ENTRIES_FILE, JSON.stringify(json, null, 4), function(err) {
+            if (err) {
+              console.error(err);
+              process.exit(1);
+            }
+            response.json(entries);
+          });
+        }
+
       }
-
+  
     }
+    // If you couldn't find that user in the ENTRIES_FILE
+    // Loop through all the objects in the file
+    
+    if(!foundUser) {
+      
+      var Entry = {}
+      Entry[username] = [];
+      Entry[username].push(newEntry);
 
-    if(isLoggedIn) {
-      response.json({'msg':'redirect', 'location':'/home'});
-    }
-    else {
-      response.json({'msg':'notLoggedIn', 'location':''});
-    }
+      json.push(Entry);
+      
+      entries = json[json.length-1][username];
 
+      fs.writeFile(ENTRIES_FILE, JSON.stringify(json, null, 4), function(err) {
+        if (err) {
+          console.error(err);
+          process.exit(1);
+        }
+        response.json(entries);
+      });
+    }
+    
   });
 }); 
-
-/*app.post('/api/comments', function(req, res) {
-  fs.readFile(COMMENTS_FILE, function(err, data) {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-    var comments = JSON.parse(data);
-    // NOTE: In a real implementation, we would likely rely on a database or
-    // some other approach (e.g. UUIDs) to ensure a globally unique id. We'll
-    // treat Date.now() as unique-enough for our purposes.
-    var newComment = {
-      id: Date.now(),
-      author: req.body.author,
-      text: req.body.text,
-    };
-    comments.push(newComment);
-    fs.writeFile(COMMENTS_FILE, JSON.stringify(comments, null, 4), function(err) {
-      if (err) {
-        console.error(err);
-        process.exit(1);
-      }
-      res.json(comments);
-    });
-  });
-}); */
 
 
 app.listen(app.get('port'), function() {

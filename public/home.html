@@ -70,7 +70,6 @@
           setInterval(this.loadCommentsFromServer, 2000);
         },
         loadEntriesFromServer: function(username, url) {
-          console.log("going to load entries" + " username: " + username);
           $.ajax({
             url: url,
             dataType: 'json',
@@ -84,11 +83,27 @@
             }.bind(this)
           });
         },
+        handleEntrySubmit: function(url, title, text) {
+          //console.log(username + " " + url + " " + title + " " + text);
+          $.ajax({
+            url: url,
+            dataType: 'json',
+            type: 'POST',
+            data: {username: this.state.username, url: url, title: title, text: text},
+            success: function(data) {
+              this.setState({data: data});
+            }.bind(this),
+            error: function(xhr, status, err) {
+              console.error(this.props.url, status, err.toString());
+            }.bind(this)
+          });
+        },
         render: function() {
           return (
             <div className="blogEntryBox">
               <h1>Welcome to the Blog, {this.state.username}</h1>
               <EntryList data={this.state.data}/>
+              <EntryForm onEntrySubmit = {this.handleEntrySubmit} />
               <SignOut />
             </div>
           );
@@ -101,7 +116,7 @@
 
           var entryNodes = this.props.data.map(function(entry) {
             return (
-              <Entry title={entry.title}>
+              <Entry title={entry.title} key={entry.id}>
                 {entry.text}
               </Entry>
             );
@@ -124,6 +139,40 @@
               </h2>
               {this.props.children}
             </div>
+          );
+        }
+      });
+
+      // Entry Form component
+      var EntryForm = React.createClass({
+        getInitialState: function() {
+          return {title: '', text: ''};
+        },
+        handleTitleChange: function(e) {
+          this.setState({title: e.target.value});
+        }, 
+        handleTextChange: function(e) {
+          this.setState({text: e.target.value});
+        },
+        handleSubmit: function(e) {
+          // Call preventDefault() on the event to prevent the browser's default action of submitting the form.
+          e.preventDefault();
+          var title = this.state.title;
+          var text = this.state.text;
+          if(!title || !text) {
+            return;
+          }
+          // send request to server
+          this.props.onEntrySubmit('/api/entries', title, text);
+          this.setState({title: '', text: ''});
+        },
+        render: function() {
+          return (
+            <form className="entryForm" onSubmit={this.handleSubmit}>
+              <input type="text" placeholder="Title" value={this.state.title} onChange={this.handleTitleChange} />
+              <input type="text" placeholder="Say something..." value={this.state.text} onChange={this.handleTextChange} />
+              <input type="submit" value="Post" />
+            </form>
           );
         }
       });

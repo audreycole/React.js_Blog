@@ -58,6 +58,7 @@
           }
         },
         handleSignInSubmit: function(username, password, url) {
+          console.log(username + " " + password);
           // Submit to the server and take you to home page
           $.ajax({
             url: url,
