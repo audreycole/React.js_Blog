@@ -26,10 +26,36 @@
         - Sign Up
       */
 
+      // Get a javascript cookie by type (like "username")
+      function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i<ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1);
+            if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+        }
+        return "";
+      }
+
+      // Set cookie 
+      function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + (exdays*24*60*60*1000));
+        var expires = "expires="+d.toUTCString();
+        document.cookie = cname + "=" + cvalue + "; " + expires;
+        console.log(document.cookie);
+      }
+
       // Welcome root component
       var WelcomeBox = React.createClass({
         getInitialState: function() {
           return {data: []};
+        },
+        componentWillMount: function() {
+          if(getCookie("username") == "") {
+            this.setState({username: '', password: ''});
+          }
         },
         handleSignInSubmit: function(username, password, url) {
           // Submit to the server and take you to home page
@@ -39,23 +65,35 @@
             type: 'POST',
             data: {username: username, password: password},
             success: function(data) {
-              console.log(data.location);
-              if(data.msg==="redirect") window.location = data.location;
+              // Render the page using javascript on the view side
+              // If you've logged in correctly, set a cookie that will expire 1 day from now and redirect to their
+              // home page
+              if(data.msg==="redirect") {
+                // Set a cookie that expires one day from now for the user
+                setCookie("username", username, 1);
+                window.location = data.location;
+              }
             }.bind(this),
             error: function(xhr, status, err) {
               console.error(this.props.url, status, err.toString());
             }.bind(this)
           });
         },
-        handleSignUpSubmit: function(username, password) {
-          // Submit to the server and take you to home page
+        handleSignUpSubmit: function(username, password, url) {
+          // Submit to the server and take you to back to this page with an alert saying you have been signed in
           $.ajax({
-            url: this.state.url,
+            url: url,
             dataType: 'json',
             type: 'POST',
-            data: username, password,
+            data: {username: username, password: password},
             success: function(data) {
-              //this.setState({data: data}); <--- fix this
+              if(data.msg==="success") {
+                alert("You've successfully created an account!");
+                window.location = '/';
+              }
+              else {
+                alert("That username is already taken.");
+              }
             }.bind(this),
             error: function(xhr, status, err) {
               console.error(this.props.url, status, err.toString());
@@ -129,9 +167,8 @@
             return;
           }
           // TODO: send request to the server
-          this.setState({url: 'api/signup'});
-          // Editing this
-          this.props.onSignUpSubmit(username, password);
+          this.setState({url: '/api/signup'});
+          this.props.onSignUpSubmit(username, password, '/api/signup');
           this.setState({username: '', password: ''});
         },
         render: function() {

@@ -29,15 +29,55 @@
         - Sign Out
       */
 
+      // Get a javascript cookie by type (like "username")
+      function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i<ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1);
+            if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+        }
+        return "";
+      }
+
+      // Set cookie function
+      function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + (exdays*24*60*60*1000));
+        var expires = "expires="+d.toUTCString();
+        document.cookie = cname + "=" + cvalue + "; " + expires;
+        console.log(document.cookie);
+      }
+
       // BlogEntryBox root component
       var BlogEntryBox = React.createClass({
         getInitialState: function() {
+          
           return {data: []};
         },
+        // Called after blog page has loaded, but before the render function
+        componentWillMount: function() {
+          if(!document.cookie) {
+            window.location = "/index.html";
+          }
+          var username=getCookie("username");
+          this.state.username = username;
+        },
+       /* // After the entire blog has rendered
+        componentDidMount: function() {
+          console.log("cookie: " + document.cookie);
+          if(!document.cookie) {
+            window.location = "/";
+          }
+          else {
+            
+          }
+        },*/
         render: function() {
           return (
             <div className="blogEntryBox">
-              <h1>Welcome to the Blog</h1>
+              <h1>Welcome to the Blog, {this.state.username}</h1>
               <EntryList data={this.state.data}/>
               <SignOut />
             </div>
@@ -76,6 +116,16 @@
         class: 'btn btn-primary'
       };
       var SignOut = React.createClass({
+        handleSubmit: function(e) {
+          // Call preventDefault() on the event to prevent the browser's default action of submitting the form.
+          e.preventDefault();
+
+          // delete a specific cookie by setting it's expiration date to the past
+          // and defining a blank value
+          setCookie('cookieName', '', -1);
+
+          window.location = "/";
+        },
         render: function() {
           return (
             <form className="signOutForm" onSubmit={this.handleSubmit} >

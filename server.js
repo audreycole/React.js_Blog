@@ -26,23 +26,36 @@ app.use(function(req, res, next) {
     next();
 });
 
-// Home page
+// Page redirection
 app.use(function(request, response, next) {
-  if (request.url == "/home") {
+  if (request.url == "/") {
+    response.redirect("/index.html");
+  } 
+  else if (request.url == "/home") {
     response.redirect("/home.html");
-    // The middleware stops here.
-  } else {
+  }
+  else {
     next();
   }
 });
 
-app.get('/home', function(request, response) {
-  data = fs.readFile('/home.html',   function (err, data) {
-    res.setHeader('Content-Type', 'text/html');
-    res.send(data);
+// Process GET request for index 
+app.get('/', function(request, response) {
+  data = fs.readFile('/index.html',   function (err, data) {
+    response.setHeader('Content-Type', 'text/html');
+    response.send(data);
   });
 });
 
+// Process GET request for home page
+app.get('/home', function(request, response) {
+  data = fs.readFile('/home.html',   function (err, data) {
+    response.setHeader('Content-Type', 'text/html');
+    response.send(data);
+  });
+});
+
+// POST signin request
 app.post('/api/signin', function(request, response) {
   // Get the username and password passed as input
   var username = request.body.username;
@@ -69,26 +82,109 @@ app.post('/api/signin', function(request, response) {
     }
 
     if(isLoggedIn) {
-      res.json({'msg':'redirect','location':'/home'});
+      response.json({'msg':'redirect', 'location':'/home'});
     }
     else {
-      response.json({'msg':'notLoggedIn','location':''});
+      response.json({'msg':'notLoggedIn', 'location':''});
     }
 
   });
 }); 
 
-/*app.get('/api/comments', function(req, res) {
-  fs.readFile(COMMENTS_FILE, function(err, data) {
+// POST signup request
+app.post('/api/signup', function(request, response) {
+
+  // Get the username and password passed as input
+  var username = request.body.username;
+  var password = request.body.password;
+
+  var success = true;
+
+  fs.readFile(USERS_FILE, function(err, data) {
+    if(err) {
+      console.error(err);
+      process.exit(1);
+    }
+
+    // Parse the JSON file into a variable
+    var json = JSON.parse(data);
+    // Loop through all the keys in the file
+    for(var i = 0; i < json.length; i++) {
+      var obj = json[i];
+
+      if(obj.username == username && obj.password == password) {
+        success = false;
+      }
+
+    }
+
+    if(success) {
+      var newUser = {
+        'username': username,
+        'password': password
+      };
+      json.push(newUser);
+
+      fs.writeFile(USERS_FILE, JSON.stringify(json, null, 4), function(err) {
+        if (err) {
+          console.error(err);
+          process.exit(1);
+        }
+        response.json({'msg':'success'});
+      });
+      
+    }
+    else {
+      response.json({'msg':'failure'});
+    }
+
+  });
+}); 
+
+app.get('/api/entries', function(request, response) {
+  fs.readFile(ENTRIES_FILE, function(err, data) {
     if (err) {
       console.error(err);
       process.exit(1);
     }
-    res.json(JSON.parse(data));
+    response.json(JSON.parse(data));
   });
 });
 
-app.post('/api/comments', function(req, res) {
+// POST entries 
+app.post('/api/entries', function(request, response) {
+  // Get the username passed as input
+  var username = request.body.username;
+  
+  fs.readFile(ENTRIES_FILE, function(err, data) {
+    if(err) {
+      console.error(err);
+      process.exit(1);
+    }
+
+    // Parse the JSON file into a variable
+    var json = JSON.parse(data);
+    // Loop through all the keys in the file
+    for(var i = 0; i < json.length; i++) {
+      var obj = json[i];
+
+      if(obj.username == username) {
+        
+      }
+
+    }
+
+    if(isLoggedIn) {
+      response.json({'msg':'redirect', 'location':'/home'});
+    }
+    else {
+      response.json({'msg':'notLoggedIn', 'location':''});
+    }
+
+  });
+}); 
+
+/*app.post('/api/comments', function(req, res) {
   fs.readFile(COMMENTS_FILE, function(err, data) {
     if (err) {
       console.error(err);
