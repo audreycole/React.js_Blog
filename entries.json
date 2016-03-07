@@ -3,23 +3,24 @@
 
         [
             {
+                "title": "First Post",
                 "text": "Hey there! this is my first blog post"
             },
             {
-                "username": "audrey",
-                "text": "React is *great*!"
-            },
+                "title": "Second Post",
+                "text": "React is great!"
+            }
         ]
     },
     {"max":
         [
             {
-                "username": "max",
-                "text": "My girlfriend is *great*!"
+                "title": "First Post",
+                "text": "My girlfriend is great!"
             },
             {
-                "username": "max",
-                "text": "She is *hot*!"
+                "title": "Second Post",
+                "text": "She is hot!"
             }
         ]
     }

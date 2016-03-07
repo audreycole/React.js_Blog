@@ -53,7 +53,6 @@
       // BlogEntryBox root component
       var BlogEntryBox = React.createClass({
         getInitialState: function() {
-          
           return {data: []};
         },
         // Called after blog page has loaded, but before the render function
@@ -64,16 +63,27 @@
           var username=getCookie("username");
           this.state.username = username;
         },
-       /* // After the entire blog has rendered
+        // After the entire blog has rendered
         componentDidMount: function() {
-          console.log("cookie: " + document.cookie);
-          if(!document.cookie) {
-            window.location = "/";
-          }
-          else {
-            
-          }
-        },*/
+          this.loadEntriesFromServer(this.state.username, '/api/entries');
+          // call the "loadCommentsFromServer" function every 2 seconds
+          setInterval(this.loadCommentsFromServer, 2000);
+        },
+        loadEntriesFromServer: function(username, url) {
+          console.log("going to load entries" + " username: " + username);
+          $.ajax({
+            url: url,
+            dataType: 'json',
+            type: 'GET',
+            data: {username: username},
+            success: function(data) {
+              this.setState({data: data});
+            }.bind(this),
+            error: function(xhr, status, err) {
+              console.error(this.props.url, status, err.toString());
+            }.bind(this)
+          });
+        },
         render: function() {
           return (
             <div className="blogEntryBox">
@@ -88,10 +98,17 @@
       // EntryList component
       var EntryList = React.createClass({
         render: function() {
+
+          var entryNodes = this.props.data.map(function(entry) {
+            return (
+              <Entry title={entry.title}>
+                {entry.text}
+              </Entry>
+            );
+          });
           return (
             <div className="entryList">
-              <Entry title="My Day">My day sucked.</Entry>
-              <Entry title="Gaby"> Is a <em>great</em> friend. </Entry>
+              {entryNodes}
             </div>
           );
         }

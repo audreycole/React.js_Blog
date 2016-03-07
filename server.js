@@ -1,4 +1,5 @@
 var fs = require('fs');
+var url = require('url');
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -141,13 +142,39 @@ app.post('/api/signup', function(request, response) {
   });
 }); 
 
+
+// GET the values of the entries for that user
 app.get('/api/entries', function(request, response) {
+  // Get the query
+  var queryObject = url.parse(request.url,true).query;
+  var username = queryObject['username'];
+  var entries = [];
+
   fs.readFile(ENTRIES_FILE, function(err, data) {
     if (err) {
       console.error(err);
       process.exit(1);
     }
-    response.json(JSON.parse(data));
+
+    // Parse the JSON file into a variable
+    var json = JSON.parse(data);
+    // Loop through all the objects in the file
+    for (var i = 0; i < json.length; i++) {
+      console.log(json[i]);
+      
+      // get the key of the object (username)
+      for(var entry_user in json[i]) {
+        
+        if(entry_user == username) {
+
+          entries = json[i][entry_user];
+
+        }
+      }
+  
+    }
+
+    response.json(entries);
   });
 });
 
